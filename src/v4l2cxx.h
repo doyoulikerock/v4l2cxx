@@ -171,7 +171,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    capture(std::string device, std::function<void(uint8_t *p_data, size_t len)> callback)
+    capture(std::string device, std::function<int(uint8_t *p_data, size_t len)> callback)
             : callback_(callback) {
 
         fd_ = util_v4l2::open_device(device, &err_);
@@ -184,7 +184,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
 
     capture(std::string device, uint32_t width, uint32_t height, pixel_format format,
-            std::function<void(uint8_t *p_data, size_t len)> callback)
+            std::function<int(uint8_t *p_data, size_t len)> callback)
             : callback_(callback) {
 
 
@@ -216,6 +216,16 @@ public:
         int x = 5;
 
     }
+
+    ~capture(){
+        printf("munmap/close ...\n");
+        util_v4l2::uninit_mmap(NUM_OF_MAP_BUFFER, buffers);
+
+        close(fd_);
+
+        // 
+    }
+
 
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
@@ -265,7 +275,7 @@ private:
     constexpr static int NUM_OF_MAP_BUFFER = 4;
     struct util_v4l2::buffer buffers[NUM_OF_MAP_BUFFER];
     error_code err_ = error_code::ERR_NO_ERROR;
-    std::function<void(uint8_t *p_data, size_t len)> callback_;
+    std::function<int(uint8_t *p_data, size_t len)> callback_;
 };
 
 

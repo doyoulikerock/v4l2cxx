@@ -72,6 +72,7 @@ enum class error_code {
     ERR_READ_FRAME,
     ERR_SELECT_TIMEOUT,
     ERR_SELECT,
+    STOP
 };
 
 void print_err_code(error_code err) {
@@ -96,8 +97,8 @@ enum class pixel_format {
     V4L2CXX_PIX_FMT_RGB332 = V4L2_PIX_FMT_RGB332,
     V4L2CXX_PIX_FMT_YUYV = V4L2_PIX_FMT_YUYV,
     V4L2CXX_PIX_FMT_YVYU = V4L2_PIX_FMT_YVYU,
-    V4L2CXX_PIX_FMT_MJPEG = V4L2_PIX_FMT_MJPEG
-
+    V4L2CXX_PIX_FMT_MJPEG = V4L2_PIX_FMT_MJPEG,
+    V4L2CXX_PIX_FMT_NV12 = V4L2_PIX_FMT_NV12
 };
 
 class function;
@@ -450,6 +451,16 @@ namespace util_v4l2 {
             }
         }
     }
+
+
+    static void uninit_mmap(int nb_buffers, buffer buffers[]){
+        for(int i=0; i< nb_buffers; i++){
+            munmap(buffers[i].start, buffers[i].length);
+        }        
+    }
+
+    
+
 
     typedef struct {
         unsigned flag;
@@ -969,7 +980,7 @@ namespace util_v4l2 {
     ///////////////////////////////////////////////////////////////////////////////
 
     static int
-    read_frame(int fd, util_v4l2::buffer *pBuffer, std::function<void(uint8_t *p_data, size_t len)> callback,
+    read_frame(int fd, util_v4l2::buffer *pBuffer, std::function<int(uint8_t *p_data, size_t len)> callback,
                error_code *err) {
         SET_ERR_CODE(err, error_code::ERR_NO_ERROR);
         int numOfBytes = 0;
@@ -1001,7 +1012,8 @@ namespace util_v4l2 {
 
         assert(buf.index < 4);
 
-        callback((uint8_t *) pBuffer[buf.index].start, buf.bytesused);
+        if(callback((uint8_t *) pBuffer[buf.index].start, buf.bytesused) < 0)
+            return -2; // end of loop
 
         if (-1 == util_v4l2::xioctl(fd, VIDIOC_QBUF, &buf)) {
             std::cerr << "ERROR: read_frame VIDIOC_DQBUF\n";
@@ -1018,9 +1030,9 @@ namespace util_v4l2 {
     ///////////////////////////////////////////////////////////////////////////////
 
     static void
-    mainloop(int fd, util_v4l2::buffer *pBuffer, std::function<void(uint8_t *p_data, size_t len)> callback,
+    mainloop(int fd, util_v4l2::buffer *pBuffer, std::function<int(uint8_t *p_data, size_t len)> callback,
              error_code *err) {
-
+        int res = 0;
 //        int num_of_frames = 200;
 
         for (;;) {
@@ -1064,11 +1076,18 @@ namespace util_v4l2 {
                 SET_ERR_CODE(err, error_code::ERR_SELECT_TIMEOUT);
             }
 
-            if (read_frame(fd, pBuffer, callback,err) == -1) {
+            res = read_frame(fd, pBuffer, callback,err) ;
+            if (res == -1) {
                 SET_ERR_CODE(err, error_code::ERR_READ_FRAME);
                 // exit loop
                 return;
             }
+            if(res == -2){
+                printf("Stop mainloop\n");
+                return;
+            }
+
+            
 
             /* EAGAIN (try again) - continue select loop. */
         }
