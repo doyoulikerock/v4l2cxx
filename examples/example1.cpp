@@ -6,7 +6,7 @@
 
 
 
-void callback_stdout_pipe(uint8_t *p_data, size_t len) {
+int callback_stdout_pipe(uint8_t *p_data, size_t len) {
 
     uint8_t outBuff[921600];
     util_v4l2::raw_to_rgb(p_data, 0, outBuff, 921600, 640 * 480, 8);
