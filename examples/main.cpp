@@ -7,7 +7,7 @@
 int main(){
 
 
-    error_code err = error_code::ERR_NO_ERROR;
+    v4l2cxx_error_code err = v4l2cxx_error_code::ERR_NO_ERROR;
 
     int fd = util_v4l2::open_device("/dev/video0", &err);
 
