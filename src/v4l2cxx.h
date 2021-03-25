@@ -29,6 +29,7 @@ SOFTWARE.
 
 #include "util_v4l2.h"
 
+using namespace util_v4l2;
 
 namespace v4l2cxx {
 
@@ -158,6 +159,51 @@ namespace v4l2cxx {
         return capture_formats;
     }
 
+
+    static  void get_video_formats_ext2(int fd, std::vector<fmt_ext_t> &capture_formats) {
+        struct v4l2_fmtdesc fmt;
+        struct v4l2_frmsizeenum frmsize;
+        struct v4l2_frmivalenum frmival;
+
+        //std::vector<fmt_ext_t> capture_formats;   // results stored here.
+
+        fmt.index = 0;
+        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        while (util_v4l2::xioctl(fd, VIDIOC_ENUM_FMT, &fmt) >= 0) {
+
+            fmt_ext_t current_fmt(fmt);
+            // Save format description
+            //current_fmt.fmt = fmt;
+
+            frmsize.pixel_format = fmt.pixelformat;
+            frmsize.index = 0;
+            while (util_v4l2::xioctl(fd, VIDIOC_ENUM_FRAMESIZES, &frmsize) >= 0) {
+
+                frm_size_t vid_cap_frm_size(frmsize);
+
+                if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
+                    frmival.index = 0;
+                    frmival.pixel_format = fmt.pixelformat;
+                    frmival.width = frmsize.discrete.width;
+                    frmival.height = frmsize.discrete.height;
+                    while (util_v4l2::xioctl(fd, VIDIOC_ENUM_FRAMEINTERVALS, &frmival) >= 0) {
+
+                        // Save frame interval data
+                        vid_cap_frm_size.frmival.push_back(frmival);
+                        frmival.index++;
+                    }
+                }
+                current_fmt.v4l2_frm_sizes_.push_back(vid_cap_frm_size);
+                frmsize.index++;
+            }
+            // Save current video format
+            capture_formats.push_back(current_fmt);
+            fmt.index++;
+        }
+
+        //return capture_formats;
+    }
+
 }//namespace
 
 
@@ -274,7 +320,7 @@ private:
     int fd_{};
     constexpr static int NUM_OF_MAP_BUFFER = 4;
     struct util_v4l2::buffer buffers[NUM_OF_MAP_BUFFER];
-    error_code err_ = error_code::ERR_NO_ERROR;
+    v4l2cxx_error_code err_ = v4l2cxx_error_code::ERR_NO_ERROR;
     std::function<int(uint8_t *p_data, size_t len)> callback_;
 };
 
