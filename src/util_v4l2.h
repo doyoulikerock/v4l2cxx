@@ -99,7 +99,7 @@ static void print_err_code(v4l2cxx_error_code err) {
 
 }
 
-std::ostream &operator<<(std::ostream &os, const v4l2cxx_error_code &obj) {
+static std::ostream &operator<<(std::ostream &os, const v4l2cxx_error_code &obj) {
     os << static_cast<std::underlying_type<v4l2cxx_error_code>::type>(obj);
     return os;
 }
@@ -131,7 +131,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    int open_device(std::string device_node, v4l2cxx_error_code *err) {
+    static int open_device(std::string device_node, v4l2cxx_error_code *err) {
 
         int fd;
         SET_ERR_CODE(err, v4l2cxx_error_code::ERR_NO_ERROR);
@@ -145,7 +145,7 @@ enum class pixel_format {
         return fd;
     }
     
-    int close_device(int fd) {
+    static int close_device(int fd) {
 
         return close(fd);
     }
@@ -156,7 +156,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
 
 
-    void set_format(int fd, uint32_t width, uint32_t height, pixel_format format, v4l2cxx_error_code *err) {
+    static void set_format(int fd, uint32_t width, uint32_t height, pixel_format format, v4l2cxx_error_code *err) {
         struct v4l2_format fmt;
         unsigned int min;
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -202,7 +202,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    void set_capture_steamon(int fd, v4l2cxx_error_code *err){
+    static void set_capture_steamon(int fd, v4l2cxx_error_code *err){
         SET_ERR_CODE(err,v4l2cxx_error_code::ERR_NO_ERROR);
         enum v4l2_buf_type type;
         type  = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -216,7 +216,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    void set_capture_steamoff(int fd, v4l2cxx_error_code *err){
+    static void set_capture_steamoff(int fd, v4l2cxx_error_code *err){
         SET_ERR_CODE(err,v4l2cxx_error_code::ERR_NO_ERROR);
         enum v4l2_buf_type type;
         type  = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -230,7 +230,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    v4l2_capability query_capabilites(int fd, v4l2cxx_error_code *err) {
+    static v4l2_capability query_capabilites(int fd, v4l2cxx_error_code *err) {
         SET_ERR_CODE(err, v4l2cxx_error_code::ERR_NO_ERROR);
         struct v4l2_capability caps;
         if (-1 == util_v4l2::xioctl(fd, VIDIOC_QUERYCAP, &caps)) {
@@ -243,7 +243,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    int read_one_frame(int fd, util_v4l2::buffer *pBuffer, std::function<void(uint8_t *p_data, size_t len)> callback, v4l2cxx_error_code *err){
+    static int read_one_frame(int fd, util_v4l2::buffer *pBuffer, std::function<void(uint8_t *p_data, size_t len)> callback, v4l2cxx_error_code *err){
         SET_ERR_CODE(err,v4l2cxx_error_code::ERR_NO_ERROR);
         struct v4l2_buffer buf;
 
@@ -293,7 +293,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
 
 
-    void printv4l2_capabilites(v4l2_capability cap) {
+    static void printv4l2_capabilites(v4l2_capability cap) {
 
         if (cap.device_caps & V4L2_CAP_VIDEO_CAPTURE) {
             std::cout << "V4L2_CAP_VIDEO_CAPTURE" << std::endl;
@@ -311,7 +311,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    v4l2_format get_current_format(int fd, v4l2cxx_error_code *err) {
+    static v4l2_format get_current_format(int fd, v4l2cxx_error_code *err) {
         SET_ERR_CODE(err, v4l2cxx_error_code::ERR_NO_ERROR);
 
         v4l2_format format;
@@ -330,7 +330,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    std::vector<v4l2_fmtdesc> query_formats(int fd, v4l2cxx_error_code *err) {
+    static std::vector<v4l2_fmtdesc> query_formats(int fd, v4l2cxx_error_code *err) {
         SET_ERR_CODE(err, v4l2cxx_error_code::ERR_NO_ERROR);
 
         std::vector<v4l2_fmtdesc> formats;
@@ -348,7 +348,7 @@ enum class pixel_format {
         return formats;
     }
 
-     void query_formats2(int fd, std::vector<v4l2_fmtdesc> &formats, v4l2cxx_error_code *err ) {
+    static  void query_formats2(int fd, std::vector<v4l2_fmtdesc> &formats, v4l2cxx_error_code *err ) {
         SET_ERR_CODE(err, v4l2cxx_error_code::ERR_NO_ERROR);
 
         //std::vector<v4l2_fmtdesc> formats;
@@ -367,7 +367,7 @@ enum class pixel_format {
     }
 
 
-    int get_current_input(int fd, v4l2cxx_error_code *err) {
+    static int get_current_input(int fd, v4l2cxx_error_code *err) {
         SET_ERR_CODE(err, v4l2cxx_error_code::ERR_NO_ERROR);
 
         int input=0;
@@ -377,7 +377,7 @@ enum class pixel_format {
         return input;
     }
 
-    void print_inputs(std::vector<v4l2_input> &inputs){
+    static void print_inputs(std::vector<v4l2_input> &inputs){
         for(int i = 0; i<inputs.size(); ++i){
             printf("idx:%d name :%16s  ",i, inputs[i].name);
 
@@ -398,7 +398,7 @@ enum class pixel_format {
 
 
 
-    void query_inputs(int fd, std::vector<v4l2_input> &inputs, v4l2cxx_error_code *err ) {
+    static void query_inputs(int fd, std::vector<v4l2_input> &inputs, v4l2cxx_error_code *err ) {
         SET_ERR_CODE(err, v4l2cxx_error_code::ERR_NO_ERROR);
 
         //std::vector<v4l2_fmtdesc> formats;
@@ -562,7 +562,7 @@ enum class pixel_format {
             {0, NULL}
     };
 
-    std::string fcc2s(unsigned int val) {
+    static std::string fcc2s(unsigned int val) {
         std::string s;
 
         s += val & 0x7f;
@@ -581,7 +581,7 @@ enum class pixel_format {
         return buf;
     }
 
-    std::string buftype2s(int type) {
+    static std::string buftype2s(int type) {
         switch (type) {
             case 0:
                 return "Invalid";
@@ -614,7 +614,7 @@ enum class pixel_format {
         }
     }
 
-    std::string field2s(int val) {
+    static std::string field2s(int val) {
         switch (val) {
             case V4L2_FIELD_ANY:
                 return "Any";
@@ -641,7 +641,7 @@ enum class pixel_format {
         }
     }
 
-    std::string colorspace2s(int val) {
+    static std::string colorspace2s(int val) {
         switch (val) {
             case V4L2_COLORSPACE_DEFAULT:
                 return "Default";
@@ -735,7 +735,7 @@ enum class pixel_format {
         }
     }
 
-    std::string flags2s(unsigned val, const flag_def *def) {
+    static std::string flags2s(unsigned val, const flag_def *def) {
         std::string s;
 
         while (def->flag) {
@@ -758,15 +758,15 @@ enum class pixel_format {
             {0, NULL}
     };
 
-    std::string pixflags2s(unsigned flags) {
+    static std::string pixflags2s(unsigned flags) {
         return flags2s(flags, pixflags_def);
     }
 
-    std::string service2s(unsigned service) {
+    static std::string service2s(unsigned service) {
         return flags2s(service, service_def);
     }
 
-    void printv4l2_fmt(const struct v4l2_format &vfmt) {
+    static void printv4l2_fmt(const struct v4l2_format &vfmt) {
         const flag_def vbi_def[] = {
                 {V4L2_VBI_UNSYNC,     "unsynchronized"},
                 {V4L2_VBI_INTERLACED, "interlaced"},
@@ -950,7 +950,7 @@ enum class pixel_format {
             { 0, NULL }
     };
 
-    std::string fmtdesc2s(unsigned flags)
+    static std::string fmtdesc2s(unsigned flags)
     {
         return flags2s(flags, fmtdesc_def);
     }
@@ -1018,7 +1018,7 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////
 
-    void
+    static void
     raw_to_rgb(void *inBuff, int inBuffSize, void *outBuff, int outBuffSize, uint32_t numOfPixels, int bitPerPixel) {
         auto dst = static_cast<uint8_t *>(outBuff);
 
