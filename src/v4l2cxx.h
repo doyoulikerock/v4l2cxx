@@ -230,12 +230,19 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
 
     capture(std::string device, uint32_t width, uint32_t height, pixel_format format,
-            std::function<int(uint8_t *p_data, size_t len)> callback)
+            std::function<int(uint8_t *p_data, size_t len)> callback, int channelId=-1)
             : callback_(callback) {
 
 
         fd_ = util_v4l2::open_device(device, &err_);
         ASSERT_ERR_CODE(err_);
+
+        if(channelId>=0){
+            if (xioctl(fd_, VIDIOC_S_INPUT, &channelId)<0) {
+                printf(" Error \n");
+                exit(0);
+            }            
+        }
 
         util_v4l2::set_format(fd_, width, height, format, &err_);
         ASSERT_ERR_CODE(err_);
