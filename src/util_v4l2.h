@@ -293,16 +293,18 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
 
 
-    static void printv4l2_capabilites(v4l2_capability cap) {
+    static void printv4l2_capabilites(v4l2_capability cap,
+        int (*printf)(const char *fmt, ...) = printf
+    ) {
 
         if (cap.device_caps & V4L2_CAP_VIDEO_CAPTURE) {
-            std::cout << "V4L2_CAP_VIDEO_CAPTURE" << std::endl;
+            printf("V4L2_CAP_VIDEO_CAPTURE\n");
         }
         if (cap.device_caps & V4L2_CAP_VIDEO_OUTPUT) {
-            std::cout << "V4L2_CAP_VIDEO_OUTPUT" << std::endl;
+            printf("V4L2_CAP_VIDEO_OUTPUT\n");
         }
         if (cap.device_caps & V4L2_CAP_STREAMING) {
-            std::cout << "V4L2_CAP_STREAMING" << std::endl;
+            printf("V4L2_CAP_STREAMING\n");
         }
         
     }
@@ -377,7 +379,9 @@ enum class pixel_format {
         return input;
     }
 
-    static void print_inputs(std::vector<v4l2_input> &inputs){
+    static void print_inputs(std::vector<v4l2_input> &inputs,
+        int (*printf)(const char *fmt, ...) = printf    
+    ){
         for(int i = 0; i<inputs.size(); ++i){
             printf("idx:%d name :%16s  ",i, inputs[i].name);
 
@@ -766,7 +770,9 @@ enum class pixel_format {
         return flags2s(service, service_def);
     }
 
-    static void printv4l2_fmt(const struct v4l2_format &vfmt) {
+    static void printv4l2_fmt(const struct v4l2_format &vfmt,
+        int (*printf)(const char *fmt, ...) = printf
+    ) {
         const flag_def vbi_def[] = {
                 {V4L2_VBI_UNSYNC,     "unsynchronized"},
                 {V4L2_VBI_INTERLACED, "interlaced"},
@@ -905,7 +911,9 @@ enum class pixel_format {
         return types[type];
     }
 
-    static void print_frmival(const struct v4l2_frmivalenum &frmival, const char *prefix)
+    static void print_frmival(const struct v4l2_frmivalenum &frmival, const char *prefix,
+        int (*printf)(const char *fmt, ...) = printf
+    )
     {
         printf("%s\tInterval: %s ", prefix, frmtype2s(frmival.type).c_str());
         if (frmival.type == V4L2_FRMIVAL_TYPE_DISCRETE) {
@@ -927,7 +935,9 @@ enum class pixel_format {
         }
     }
 
-    static void print_frmsize(const struct v4l2_frmsizeenum &frmsize, const char *prefix)
+    static void print_frmsize(const struct v4l2_frmsizeenum &frmsize, const char *prefix,
+        int (*printf)(const char *fmt, ...) = printf    
+    )
     {
         printf("%s\tSize: %s ", prefix, frmtype2s(frmsize.type).c_str());
         if (frmsize.type == V4L2_FRMSIZE_TYPE_DISCRETE) {
@@ -955,7 +965,9 @@ enum class pixel_format {
         return flags2s(flags, fmtdesc_def);
     }
 
-    static void print_video_formats_ext(int fd, __u32 type)
+    static void print_video_formats_ext(int fd, __u32 type,
+        int (*printf)(const char *fmt, ...) = printf
+    )
     {
         struct v4l2_fmtdesc fmt;
         struct v4l2_frmsizeenum frmsize;
@@ -997,7 +1009,9 @@ enum class pixel_format {
     ///////////////////////////////////////////////////////////////////////////////
 
 
-    static void print_fmt_desc(v4l2_fmtdesc fmt){
+    static void print_fmt_desc(v4l2_fmtdesc fmt,
+        int (*printf)(const char *fmt, ...) = printf
+    ){
         printf("\tIndex       : %d\n", fmt.index);
         printf("\tType        : %s\n", buftype2s(V4L2_BUF_TYPE_VIDEO_CAPTURE).c_str());
         printf("\tPixel Format: '%s'", fcc2s(fmt.pixelformat).c_str());
